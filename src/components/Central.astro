@@ -1,0 +1,314 @@
+---
+import { Picture } from 'astro:assets';
+import TituloSecao from './TituloSecao.astro';
+import { central } from '../content/site';
+import portao from '../assets/fotos/sobre-entrada.jpg';
+import hall from '../assets/fotos/central-hall.jpg';
+import fachada from '../assets/fotos/abertura-torre.jpg';
+import perimetro from '../assets/fotos/central-perimetro.jpg';
+
+const fotos = [portao, hall, fachada, perimetro];
+const posicoes = ['50% 55%', '50% 50%', '50% 70%', '50% 80%'];
+const horariosIniciais = ['19:42', '19:38', '19:35', '19:31', '19:27'];
+---
+
+<section class="secao central" id="central" aria-labelledby="central-titulo">
+  <div class="container central__grade">
+    <div>
+      <TituloSecao id="central-titulo" titulo={central.titulo} manuscrito={central.manuscrito} />
+      <p class="texto revelar">{central.texto}</p>
+      <p class="rotulo central__nota revelar">{central.nota}</p>
+    </div>
+    <div class="central__painel revelar" aria-hidden="true" data-central data-eventos={JSON.stringify(central.eventos)}>
+      <div class="central__cameras">
+        {
+          central.cameras.map((nome, i) => (
+            <figure class="central__camera" style={`--posicao: ${posicoes[i]}`}>
+              <Picture src={fotos[i]} alt="" formats={['avif', 'webp']} widths={[360, 640]} sizes="(max-width: 1099px) 45vw, 22vw" />
+              <figcaption>{nome}</figcaption>
+              <span class="central__rec">REC</span>
+            </figure>
+          ))
+        }
+      </div>
+      <div class="central__registro">
+        <p class="central__cabecalho"><span>Eventos</span><span data-relogio>19:42:10</span></p>
+        <ul class="central__eventos" role="list" data-lista>
+          {central.eventos.slice(0, 5).map((evento, i) => (<li><time>{horariosIniciais[i]}</time><span>{evento}</span></li>))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const painel = document.querySelector<HTMLElement>('[data-central]');
+  if (painel) {
+    const eventos: string[] = JSON.parse(painel.dataset.eventos ?? '[]');
+    const lista = painel.querySelector<HTMLUListElement>('[data-lista]');
+    const relogio = painel.querySelector<HTMLElement>('[data-relogio]');
+    const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const MAXIMO = 7;
+    let proximo = 0;
+    let timerEventos: number | undefined;
+    let timerRelogio: number | undefined;
+    let visivel = false;
+
+    const doisDigitos = (n: number) => String(n).padStart(2, '0');
+    const horaMinuto = (data: Date) => `${doisDigitos(data.getHours())}:${doisDigitos(data.getMinutes())}`;
+    const criarLinha = (data: Date, texto: string) => {
+      const linha = document.createElement('li');
+      const hora = document.createElement('time');
+      hora.textContent = horaMinuto(data);
+      const descricao = document.createElement('span');
+      descricao.textContent = texto;
+      linha.append(hora, descricao);
+      return linha;
+    };
+
+    if (lista && relogio && eventos.length > 0) {
+      const agora = Date.now();
+      lista.replaceChildren(...[0, 1, 2, 3, 4].map((i) => criarLinha(new Date(agora - i * 3 * 60_000), eventos[(i + 4) % eventos.length])));
+
+      const adicionar = () => {
+        const linha = criarLinha(new Date(), eventos[proximo % eventos.length]);
+        proximo += 1;
+        linha.classList.add('is-nova');
+        lista.prepend(linha);
+        while (lista.children.length > MAXIMO) lista.lastElementChild?.remove();
+      };
+      const atualizarRelogio = () => {
+        const data = new Date();
+        relogio.textContent = `${horaMinuto(data)}:${doisDigitos(data.getSeconds())}`;
+      };
+      const iniciar = () => {
+        if (timerRelogio === undefined) {
+          atualizarRelogio();
+          timerRelogio = window.setInterval(atualizarRelogio, 1000);
+        }
+        if (!reduzir && timerEventos === undefined) timerEventos = window.setInterval(adicionar, 2600);
+      };
+      const parar = () => {
+        window.clearInterval(timerEventos);
+        window.clearInterval(timerRelogio);
+        timerEventos = undefined;
+        timerRelogio = undefined;
+      };
+
+      new IntersectionObserver(([entrada]) => {
+        visivel = entrada.isIntersecting;
+        if (visivel && !document.hidden) iniciar();
+        else parar();
+      }).observe(painel);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) parar();
+        else if (visivel) iniciar();
+      });
+      atualizarRelogio();
+      painel.dataset.pronto = 'true';
+    }
+  }
+</script>
+
+<style>
+  .central__grade {
+    display: grid;
+    grid-template-columns: 4fr 7fr;
+    align-items: start;
+    gap: clamp(40px, 5vw, 64px);
+  }
+
+  .central__nota {
+    margin-top: 28px;
+  }
+
+  .central__painel {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 16px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    background: var(--bg-deep);
+  }
+
+  .central__cameras {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .central__camera {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .central__camera :global(picture) {
+    height: 100%;
+  }
+
+  .central__camera :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--posicao);
+    filter: grayscale(1) contrast(1.15) brightness(0.75);
+  }
+
+  .central__camera::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(144, 186, 66, 0.16);
+    mix-blend-mode: screen;
+  }
+
+  .central__camera::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -30%;
+    z-index: 2;
+    height: 30%;
+    background: linear-gradient(180deg, transparent, rgba(183, 208, 111, 0.18), transparent);
+    animation: varredura 3.6s linear infinite;
+  }
+
+  .central__camera:nth-child(2)::after {
+    animation-delay: -1s;
+  }
+
+  .central__camera:nth-child(3)::after {
+    animation-delay: -2s;
+  }
+
+  .central__camera:nth-child(4)::after {
+    animation-delay: -2.8s;
+  }
+
+  @keyframes varredura {
+    to {
+      top: 110%;
+    }
+  }
+
+  .central__camera figcaption {
+    position: absolute;
+    left: 8px;
+    bottom: 7px;
+    z-index: 3;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .central__rec {
+    position: absolute;
+    right: 8px;
+    top: 7px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9.5px;
+    letter-spacing: 0.1em;
+  }
+
+  .central__rec::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e5484d;
+    animation: piscar 1.2s steps(2) infinite;
+  }
+
+  @keyframes piscar {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .central__registro {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding-left: 16px;
+    border-left: 1px solid var(--line);
+  }
+
+  .central__cabecalho {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--accent);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .central__eventos {
+    height: 236px;
+    overflow: hidden;
+  }
+
+  .central__eventos :global(li) {
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .central__eventos :global(li.is-nova) {
+    animation: entrar 0.6s var(--ease);
+  }
+
+  .central__eventos :global(time) {
+    margin-right: 8px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .central__eventos :global(span) {
+    color: var(--muted);
+  }
+
+  @keyframes entrar {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+  }
+
+  @media (max-width: 1099px) {
+    .central__grade {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 699px) {
+    .central__painel {
+      grid-template-columns: 1fr;
+      padding: 12px;
+    }
+
+    .central__registro {
+      padding: 12px 0 0;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .central__eventos {
+      height: auto;
+    }
+
+    .central__eventos :global(li:nth-child(n + 5)) {
+      display: none;
+    }
+  }
+</style>

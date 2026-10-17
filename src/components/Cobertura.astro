@@ -1,0 +1,173 @@
+---
+import TituloSecao from './TituloSecao.astro';
+import { cobertura } from '../content/site';
+---
+
+<section class="secao secao--alt cobertura" id="cobertura" aria-labelledby="cobertura-titulo">
+  <div class="container">
+    <TituloSecao id="cobertura-titulo" titulo={cobertura.titulo} manuscrito={cobertura.manuscrito} />
+    <div class="cobertura__grade">
+      <div class="revelar">
+        <ul class="cobertura__lista" role="list">
+          {
+            cobertura.pinos.map((pino) => (
+              <li class:list={[{ 'is-sede': pino.sede }]}>
+                <i aria-hidden="true" />
+                {pino.cidade}
+                {pino.sede && <small>Central 24h</small>}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="rotulo cobertura__nota">{cobertura.nota}</p>
+      </div>
+      <figure class="cobertura__mapa revelar">
+        <svg viewBox="0 0 800 420" role="img" aria-labelledby="mapa-titulo">
+          <title id="mapa-titulo">Mapa do Vale do Paraíba com as cidades atendidas pela CM Portaria Virtual</title>
+          <defs>
+            <pattern id="mapa-grade" width="34" height="34" patternUnits="userSpaceOnUse" patternTransform="rotate(-18)">
+              <path d="M34 0H0V34" fill="none" stroke="rgba(236,232,221,.05)" />
+            </pattern>
+          </defs>
+          <rect width="800" height="420" fill="url(#mapa-grade)" />
+          <path d="M18 300 C90 306 140 262 200 232 S330 206 400 176 S520 146 560 122 S650 78 700 48 S770 18 792 10" fill="none" stroke="rgba(110,170,190,.35)" stroke-width="2.2" />
+          <text class="mapa-rotulo mapa-rotulo--rio" x="232" y="214" transform="rotate(-14 232 214)">RIO PARAÍBA DO SUL</text>
+          <path d="M30 372 L111 331 L197 246 L300 214 L392 186 L556 132 L658 62 L770 22" fill="none" stroke="rgba(236,232,221,.3)" stroke-width="1.4" stroke-dasharray="6 6" />
+          <text class="mapa-rotulo" x="430" y="204" transform="rotate(-18 430 204)">RODOVIA PRESIDENTE DUTRA</text>
+          <text class="mapa-rotulo mapa-rotulo--serra" x="60" y="60">SERRA DA MANTIQUEIRA</text>
+          <text class="mapa-rotulo mapa-rotulo--serra" x="470" y="380">SERRA DO MAR</text>
+          {
+            cobertura.pinos.map((pino, i) => (
+              <g>
+                <circle class="mapa-pulso" cx={pino.x} cy={pino.y} r={pino.sede ? 9 : 6} style={`animation-delay: -${i * 0.5}s`} />
+                <circle class="mapa-ponto" cx={pino.x} cy={pino.y} r={pino.sede ? 8 : 5} />
+                <text class="mapa-cidade" x={pino.rotuloX} y={pino.rotuloY}>{pino.cidade}</text>
+              </g>
+            ))
+          }
+        </svg>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cobertura__grade {
+    display: grid;
+    grid-template-columns: 4fr 7fr;
+    align-items: center;
+    gap: clamp(32px, 5vw, 56px);
+  }
+
+  .cobertura__lista {
+    border-top: 1px solid var(--line);
+  }
+
+  .cobertura__lista li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 15px;
+  }
+
+  .cobertura__lista i {
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .cobertura__lista .is-sede i {
+    width: 13px;
+    height: 13px;
+    box-shadow: 0 0 0 5px rgba(183, 208, 111, 0.18);
+  }
+
+  .cobertura__lista small {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .cobertura__nota {
+    margin-top: 18px;
+  }
+
+  .cobertura__mapa {
+    border: 1px solid var(--line);
+    background: var(--bg-deep);
+  }
+
+  .cobertura__mapa svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .mapa-rotulo {
+    fill: rgba(236, 232, 221, 0.5);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+
+  .mapa-rotulo--rio {
+    fill: rgba(140, 195, 215, 0.7);
+  }
+
+  .mapa-rotulo--serra {
+    fill: rgba(236, 232, 221, 0.32);
+    font-size: 11px;
+    letter-spacing: 3px;
+  }
+
+  .mapa-cidade {
+    fill: var(--text);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .mapa-ponto {
+    fill: var(--accent);
+  }
+
+  .mapa-pulso {
+    fill: rgba(183, 208, 111, 0.45);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pulso 2.4s ease-out infinite;
+  }
+
+  @keyframes pulso {
+    0% {
+      transform: scale(0.6);
+      opacity: 0.9;
+    }
+
+    100% {
+      transform: scale(3.2);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .cobertura__grade {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 699px) {
+    .mapa-rotulo {
+      display: none;
+    }
+
+    .mapa-cidade {
+      font-size: 24px;
+    }
+  }
+</style>

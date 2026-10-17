@@ -1,0 +1,70 @@
+---
+import TituloSecao from './TituloSecao.astro';
+import { duvidas } from '../content/site';
+---
+
+<section class="secao duvidas" id="duvidas" aria-labelledby="duvidas-titulo">
+  <div class="container">
+    <TituloSecao id="duvidas-titulo" titulo={duvidas.titulo} manuscrito={duvidas.manuscrito} />
+    <div class="duvidas__lista revelar">
+      {
+        duvidas.perguntas.map((item, i) => (
+          <details name="duvidas" open={i === 0}>
+            <summary>{item.pergunta}</summary>
+            <p>{item.resposta}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .duvidas__lista details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .duvidas__lista details:first-child {
+    border-top: 1px solid var(--line);
+  }
+
+  .duvidas__lista summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 24px 0;
+    font-family: var(--font-serif);
+    font-size: clamp(20px, 2.2vw, 25px);
+    letter-spacing: 0.03em;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .duvidas__lista summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .duvidas__lista summary::after {
+    content: '+';
+    flex: none;
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 26px;
+    line-height: 1;
+    transition: transform 0.3s var(--ease);
+  }
+
+  .duvidas__lista details[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .duvidas__lista p {
+    max-width: 760px;
+    padding-bottom: 24px;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+</style>

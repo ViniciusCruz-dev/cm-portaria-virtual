@@ -14,8 +14,7 @@ const linhas = abertura.titulo.split('\n');
   <div class="abertura__veu" aria-hidden="true"></div>
   <div class="abertura__conteudo container">
     <h1 class="abertura__titulo" id="abertura-titulo">
-      {linhas.map((linha, i) => (<Fragment>{i > 0 && <br />}{linha}</Fragment>))}
-      <span class="abertura__manuscrito manuscrito">{abertura.manuscrito}</span>
+      {linhas.map((linha, i) => (<span class="abertura__linha">{linha}{i < linhas.length - 1 ? ' ' : ''}</span>))}{' '}<span class="abertura__manuscrito manuscrito">{abertura.manuscrito}</span>
     </h1>
     <div class="abertura__base">
       <p class="abertura__texto">{abertura.texto}</p>
@@ -78,6 +77,10 @@ const linhas = abertura.titulo.split('\n');
     letter-spacing: 0.06em;
     text-align: center;
     text-transform: uppercase;
+  }
+
+  .abertura__linha {
+    display: block;
   }
 
   .abertura__manuscrito {

@@ -10,8 +10,7 @@ const linhas = titulo.split('\n');
 ---
 
 <h2 class="titulo-secao revelar" id={id}>
-  {linhas.map((linha, i) => (<span class="titulo-secao__linha">{linha}{i < linhas.length - 1 ? ' ' : ''}</span>))}
-  <span class="titulo-secao__manuscrito manuscrito">{manuscrito}</span>
+  {linhas.map((linha, i) => (<span class="titulo-secao__linha">{linha}{i < linhas.length - 1 ? ' ' : ''}</span>))}{' '}<span class="titulo-secao__manuscrito manuscrito">{manuscrito}</span>
 </h2>
 
 <style>

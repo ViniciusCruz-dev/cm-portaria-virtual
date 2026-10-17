@@ -20,9 +20,7 @@ const base = import.meta.env.BASE_URL;
   </nav>
   <span class="menu__divisor" aria-hidden="true"></span>
   <p class="menu__contato">
-    <a href={contato.telefone0800Link} data-evento="clique_telefone">{contato.telefone0800}</a>
-    ·
-    <a href={linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao)} target="_blank" rel="noopener" data-evento="clique_whatsapp">{contato.whatsapp}</a>
+    <a href={contato.telefone0800Link} data-evento="clique_telefone">{contato.telefone0800}</a> · <a href={linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao)} target="_blank" rel="noopener" data-evento="clique_whatsapp">{contato.whatsapp}</a>
   </p>
   <div class="menu__botoes">
     <a class="pill pill--cheia" href={`${base}#contato`} data-link-menu>Solicitar orçamento</a>

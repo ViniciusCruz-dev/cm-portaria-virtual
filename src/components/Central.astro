@@ -95,8 +95,9 @@ const horariosIniciais = ['19:42', '19:38', '19:35', '19:31', '19:27'];
         timerRelogio = undefined;
       };
 
-      new IntersectionObserver(([entrada]) => {
-        visivel = entrada.isIntersecting;
+      new IntersectionObserver((entradas) => {
+        // O navegador pode entregar várias leituras de uma vez; vale a mais recente.
+        visivel = entradas[entradas.length - 1].isIntersecting;
         if (visivel && !document.hidden) iniciar();
         else parar();
       }).observe(painel);

@@ -1,0 +1,142 @@
+---
+import { Picture } from 'astro:assets';
+import foto from '../assets/fotos/abertura-torre.jpg';
+import { abertura, cidades, contato } from '../content/site';
+
+const base = import.meta.env.BASE_URL;
+const linhas = abertura.titulo.split('\n');
+---
+
+<section class="abertura" id="inicio" aria-labelledby="abertura-titulo">
+  <div class="abertura__foto">
+    <Picture src={foto} alt={abertura.altFoto} formats={['avif', 'webp']} widths={[640, 1024, 1600, 2400]} sizes="100vw" priority />
+  </div>
+  <div class="abertura__veu" aria-hidden="true"></div>
+  <div class="abertura__conteudo container">
+    <h1 class="abertura__titulo" id="abertura-titulo">
+      {linhas.map((linha, i) => (<Fragment>{i > 0 && <br />}{linha}</Fragment>))}
+      <span class="abertura__manuscrito manuscrito">{abertura.manuscrito}</span>
+    </h1>
+    <div class="abertura__base">
+      <p class="abertura__texto">{abertura.texto}</p>
+      <div class="abertura__botoes">
+        <a class="pill pill--cheia" href={`${base}#contato`}>{abertura.botaoPrincipal}</a>
+        <a class="pill" href={`${base}#como-funciona`}>{abertura.botaoSecundario}</a>
+      </div>
+    </div>
+    <div class="abertura__rodape">
+      <a href={contato.telefone0800Link} data-evento="clique_telefone">Central 24h · {contato.telefone0800}</a>
+      <span class="abertura__cidades">{cidades.join(' · ')}</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .abertura {
+    position: relative;
+    display: flex;
+    min-height: max(620px, 100svh);
+    overflow: hidden;
+  }
+
+  .abertura__foto {
+    position: absolute;
+    inset: 0;
+  }
+
+  .abertura__foto :global(picture) {
+    height: 100%;
+  }
+
+  .abertura__foto :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 62%;
+  }
+
+  .abertura__veu {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11, 36, 38, 0.93) 0%, rgba(11, 36, 38, 0.42) 30%, rgba(11, 36, 38, 0.06) 55%, rgba(11, 36, 38, 0.97) 100%);
+  }
+
+  .abertura__conteudo {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(var(--header-h) + clamp(40px, 9vh, 96px));
+    padding-bottom: 28px;
+  }
+
+  .abertura__titulo {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(25px, 6.2vw, 80px);
+    line-height: 1.02;
+    letter-spacing: 0.06em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .abertura__manuscrito {
+    display: block;
+    margin-top: 0.05em;
+    font-size: 0.8em;
+  }
+
+  .abertura__base {
+    max-width: 440px;
+    margin-top: auto;
+    padding-top: 48px;
+  }
+
+  .abertura__texto {
+    margin-bottom: 26px;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .abertura__botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .abertura__rodape {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 699px) {
+    .abertura__titulo {
+      font-size: clamp(25px, 7.8vw, 34px);
+      letter-spacing: 0.04em;
+    }
+
+    .abertura__veu {
+      background: linear-gradient(180deg, rgba(11, 36, 38, 0.94) 0%, rgba(11, 36, 38, 0.45) 30%, rgba(11, 36, 38, 0.12) 46%, rgba(11, 36, 38, 0.8) 64%, rgba(11, 36, 38, 0.97) 100%);
+    }
+
+    .abertura__texto {
+      font-size: 15px;
+    }
+
+    .abertura__botoes {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .abertura__cidades {
+      display: none;
+    }
+  }
+</style>

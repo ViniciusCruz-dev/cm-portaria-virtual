@@ -1,0 +1,160 @@
+---
+import TituloSecao from './TituloSecao.astro';
+import { comoFunciona } from '../content/site';
+
+const ultimo = comoFunciona.passos.length - 1;
+---
+
+<section class="secao secao--alt como" id="como-funciona" aria-labelledby="como-titulo">
+  <div class="container">
+    <TituloSecao id="como-titulo" titulo={comoFunciona.titulo} manuscrito={comoFunciona.manuscrito} />
+  </div>
+  <div class="como__trilho container" data-trilho tabindex="0" role="region" aria-label="Passos de como funciona">
+    <ol class="como__lista" role="list">
+      {
+        comoFunciona.passos.map((passo, i) => (
+          <li class:list={['como__passo', 'revelar', { 'como__passo--destaque': i === ultimo }]}>
+            <h3>{passo.titulo}</h3>
+            <p>{passo.texto}</p>
+            <span class="como__numero" aria-hidden="true">{i + 1}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+  <div class="como__pontos" aria-hidden="true" data-pontos>
+    {comoFunciona.passos.map((_, i) => (<i class:list={[{ 'is-ativo': i === 0 }]} />))}
+  </div>
+</section>
+
+<script>
+  const trilho = document.querySelector<HTMLElement>('[data-trilho]');
+  const pontos = document.querySelectorAll<HTMLElement>('[data-pontos] i');
+  if (trilho && pontos.length > 0) {
+    const passos = Array.from(trilho.querySelectorAll<HTMLElement>('.como__passo'));
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        for (const entrada of entradas) {
+          if (entrada.isIntersecting) {
+            const indice = passos.indexOf(entrada.target as HTMLElement);
+            pontos.forEach((ponto, i) => ponto.classList.toggle('is-ativo', i === indice));
+          }
+        }
+      },
+      { root: trilho, threshold: 0.6 },
+    );
+    passos.forEach((passo) => observador.observe(passo));
+  }
+</script>
+
+<style>
+  .como__lista {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .como__passo {
+    position: relative;
+    min-height: 240px;
+    margin-left: -1px;
+    padding: 26px 24px;
+    border: 1px solid var(--line);
+  }
+
+  .como__passo h3 {
+    margin-bottom: 10px;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 21px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .como__passo p {
+    max-width: 180px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .como__numero {
+    position: absolute;
+    right: 20px;
+    bottom: 10px;
+    color: rgba(236, 232, 221, 0.85);
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: 104px;
+    line-height: 0.8;
+    font-variant-numeric: lining-nums;
+  }
+
+  .como__passo--destaque {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .como__passo--destaque h3,
+  .como__passo--destaque .como__numero {
+    color: var(--on-accent);
+  }
+
+  .como__passo--destaque p {
+    color: rgba(11, 36, 38, 0.8);
+  }
+
+  .como__pontos {
+    display: none;
+  }
+
+  @media (max-width: 1099px) {
+    .como__trilho {
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+
+    .como__trilho::-webkit-scrollbar {
+      display: none;
+    }
+
+    .como__lista {
+      display: flex;
+      gap: 12px;
+      width: max-content;
+    }
+
+    .como__passo {
+      flex: 0 0 auto;
+      width: min(78vw, 300px);
+      min-height: 210px;
+      margin-left: 0;
+      scroll-snap-align: start;
+    }
+
+    .como__numero {
+      font-size: 84px;
+    }
+
+    .como__pontos {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .como__pontos i {
+      width: 6px;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--line-strong);
+      transition: width 0.3s, background-color 0.3s;
+    }
+
+    .como__pontos i.is-ativo {
+      width: 18px;
+      background: var(--accent);
+    }
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import { Picture } from 'astro:assets';
+import foto from '../assets/fotos/sobre-entrada.jpg';
+import TituloSecao from './TituloSecao.astro';
+import { sobre } from '../content/site';
+---
+
+<section class="secao sobre" id="sobre" aria-labelledby="sobre-titulo">
+  <div class="container sobre__grade">
+    <div class="sobre__foto revelar">
+      <Picture src={foto} alt={sobre.altFoto} formats={['avif', 'webp']} widths={[480, 800, 1100]} sizes="(max-width: 899px) 100vw, 40vw" />
+    </div>
+    <div>
+      <TituloSecao id="sobre-titulo" titulo={sobre.titulo} manuscrito={sobre.manuscrito} />
+      {sobre.paragrafos.map((paragrafo) => (<p class="texto revelar">{paragrafo}</p>))}
+      <ul class="sobre__diferenciais revelar" role="list">
+        {sobre.diferenciais.map((diferencial) => (<li>{diferencial}</li>))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .sobre__grade {
+    display: grid;
+    grid-template-columns: 5fr 6fr;
+    align-items: center;
+    gap: clamp(40px, 6vw, 88px);
+  }
+
+  .sobre__foto {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  .sobre__foto :global(picture) {
+    height: 100%;
+  }
+
+  .sobre__foto :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.75) brightness(0.9);
+  }
+
+  .sobre__diferenciais {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 44px;
+    border-top: 1px solid var(--line);
+  }
+
+  .sobre__diferenciais li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 12px 20px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .sobre__diferenciais li::before {
+    content: '';
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  @media (max-width: 899px) {
+    .sobre__grade {
+      grid-template-columns: 1fr;
+    }
+
+    .sobre__foto {
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  @media (max-width: 499px) {
+    .sobre__diferenciais {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

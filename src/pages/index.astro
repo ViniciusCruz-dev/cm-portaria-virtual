@@ -1,7 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
+import Abertura from '../components/Abertura.astro';
+import Sobre from '../components/Sobre.astro';
+import ComoFunciona from '../components/ComoFunciona.astro';
+import { seo } from '../content/site';
 ---
 
-<Base titulo="CM Portaria Virtual" descricao="Portaria virtual para condomínios em São José dos Campos.">
-  <h1>CM Portaria Virtual</h1>
+<Base titulo={seo.titulo} descricao={seo.descricao}>
+  <Abertura />
+  <Sobre />
+  <ComoFunciona />
 </Base>

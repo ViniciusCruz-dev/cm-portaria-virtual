@@ -10,7 +10,7 @@ const linhas = titulo.split('\n');
 ---
 
 <h2 class="titulo-secao revelar" id={id}>
-  {linhas.map((linha, i) => (<Fragment>{i > 0 && <br />}{linha}</Fragment>))}
+  {linhas.map((linha, i) => (<span class="titulo-secao__linha">{linha}{i < linhas.length - 1 ? ' ' : ''}</span>))}
   <span class="titulo-secao__manuscrito manuscrito">{manuscrito}</span>
 </h2>
 
@@ -28,6 +28,10 @@ const linhas = titulo.split('\n');
     text-transform: uppercase;
   }
 
+  .titulo-secao__linha {
+    display: block;
+  }
+
   .titulo-secao__manuscrito {
     position: absolute;
     right: -0.4em;
@@ -40,6 +44,10 @@ const linhas = titulo.split('\n');
     .titulo-secao {
       display: block;
       padding-right: 0;
+    }
+
+    .titulo-secao__linha {
+      display: inline;
     }
 
     .titulo-secao__manuscrito {

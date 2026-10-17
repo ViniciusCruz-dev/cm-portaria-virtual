@@ -1,0 +1,119 @@
+---
+import { GA_ID } from 'astro:env/client';
+
+const base = import.meta.env.BASE_URL;
+---
+
+{
+  GA_ID && (
+    <div class="aviso-cookies" role="region" aria-label="Aviso de cookies" hidden data-aviso-cookies data-ga={GA_ID}>
+      <p>
+        Usamos cookies para medir as visitas e melhorar o site. <a href={`${base}politica-de-privacidade/`}>Saiba mais</a>
+      </p>
+      <div class="aviso-cookies__botoes">
+        <button class="pill" type="button" data-recusar>
+          Recusar
+        </button>
+        <button class="pill pill--cheia" type="button" data-aceitar>
+          Aceitar
+        </button>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  import { lerEscolha, salvarEscolha } from '../lib/consentimento';
+
+  const aviso = document.querySelector<HTMLElement>('[data-aviso-cookies]');
+  if (aviso) {
+    const id = aviso.dataset.ga ?? '';
+    const armazenamento = (() => {
+      try {
+        return window.localStorage;
+      } catch {
+        return null;
+      }
+    })();
+    const janela = window as unknown as { dataLayer: unknown[]; gtag: (...args: unknown[]) => void };
+
+    const carregar = () => {
+      janela.dataLayer = janela.dataLayer || [];
+      janela.gtag = function gtag() {
+        // eslint-disable-next-line prefer-rest-params
+        janela.dataLayer.push(arguments);
+      };
+      janela.gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied' });
+      janela.gtag('consent', 'update', { analytics_storage: 'granted' });
+      janela.gtag('js', new Date());
+      janela.gtag('config', id);
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+      document.head.append(script);
+      const enviar = (nome: string) => janela.gtag('event', nome);
+      document.addEventListener('click', (evento) => {
+        const alvo = (evento.target as Element | null)?.closest<HTMLElement>('[data-evento]');
+        if (alvo?.dataset.evento) enviar(alvo.dataset.evento);
+      });
+      window.addEventListener('cm:evento', (evento) => enviar((evento as CustomEvent<{ nome: string }>).detail.nome));
+    };
+
+    const escolha = lerEscolha(armazenamento);
+    if (escolha === 'aceito') carregar();
+    else if (escolha === null) aviso.hidden = false;
+
+    aviso.querySelector('[data-aceitar]')?.addEventListener('click', () => {
+      salvarEscolha(armazenamento, 'aceito');
+      aviso.hidden = true;
+      carregar();
+    });
+    aviso.querySelector('[data-recusar]')?.addEventListener('click', () => {
+      salvarEscolha(armazenamento, 'recusado');
+      aviso.hidden = true;
+    });
+  }
+</script>
+
+<style>
+  .aviso-cookies {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    max-width: 720px;
+    padding: 16px 20px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-deep);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    font-size: 13px;
+  }
+
+  .aviso-cookies a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  .aviso-cookies__botoes {
+    display: flex;
+    flex: none;
+    gap: 10px;
+  }
+
+  .aviso-cookies .pill {
+    min-height: 44px;
+    padding: 0 18px;
+  }
+
+  @media (max-width: 599px) {
+    .aviso-cookies {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>

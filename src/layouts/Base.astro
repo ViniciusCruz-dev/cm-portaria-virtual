@@ -5,6 +5,7 @@ import Cabecalho from '../components/Cabecalho.astro';
 import MenuCelular from '../components/MenuCelular.astro';
 import Rodape from '../components/Rodape.astro';
 import WhatsAppFlutuante from '../components/WhatsAppFlutuante.astro';
+import AvisoCookies from '../components/AvisoCookies.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 
@@ -58,6 +59,7 @@ const json = (dado: unknown) => JSON.stringify(dado).replace(/</g, '\\u003c');
     <main id="conteudo"><slot /></main>
     <Rodape />
     <WhatsAppFlutuante />
+    <AvisoCookies />
     <script>
       const revelaveis = document.querySelectorAll('.revelar');
       const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

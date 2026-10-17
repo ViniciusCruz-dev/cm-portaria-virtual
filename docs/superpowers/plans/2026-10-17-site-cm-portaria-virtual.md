@@ -5543,9 +5543,9 @@ E, logo abaixo da linha `<WhatsAppFlutuante />`, adicione:
 
 ```bash
 npm run build
-node -e "const h=require('fs').readFileSync('dist/index.html','utf8'); if(h.includes('data-aviso-cookies')) {console.error('ERRO: aviso sem GA_ID'); process.exit(1)} console.log('ok: sem GA_ID não há aviso')"
+node -e "const h=require('fs').readFileSync('dist/index.html','utf8'); const tem=h.includes('aria-label=\"Aviso de cookies\"'); console.log(tem?'ERRO: aviso sem GA_ID':'ok: sem GA_ID não há aviso'); process.exit(tem?1:0)"
 npx cross-env GA_ID=G-TESTE12345 npm run build
-node -e "const h=require('fs').readFileSync('dist/index.html','utf8'); if(!h.includes('data-aviso-cookies')||!h.includes('G-TESTE12345')) {console.error('ERRO: aviso ausente com GA_ID'); process.exit(1)} console.log('ok: com GA_ID o aviso aparece')"
+node -e "const h=require('fs').readFileSync('dist/index.html','utf8'); const ok=h.includes('aria-label=\"Aviso de cookies\"')&&h.includes('data-ga=\"G-TESTE12345\"'); console.log(ok?'ok: com GA_ID o aviso aparece':'ERRO: aviso ausente com GA_ID'); process.exit(ok?0:1)"
 npm run build
 ```
 Expected: as duas linhas começam com `ok:`. O último `npm run build` devolve o `dist/` sem GA.

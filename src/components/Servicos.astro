@@ -1,0 +1,283 @@
+---
+import { Picture } from 'astro:assets';
+import TituloSecao from './TituloSecao.astro';
+import { servicos, type IdServico } from '../content/site';
+import monitoramento from '../assets/fotos/servico-monitoramento.jpg';
+import acesso from '../assets/fotos/servico-acesso.jpg';
+import app from '../assets/fotos/servico-app.jpg';
+import audio from '../assets/fotos/servico-audio.jpg';
+import relatorios from '../assets/fotos/servico-relatorios.jpg';
+import emergencias from '../assets/fotos/servico-emergencias.jpg';
+
+const fotos: Record<IdServico, ImageMetadata> = { monitoramento, acesso, app, audio, relatorios, emergencias };
+const numero = (i: number) => String(i + 1).padStart(2, '0');
+---
+
+<section class="secao secao--alt servicos" id="servicos" aria-labelledby="servicos-titulo">
+  <div class="container">
+    <TituloSecao id="servicos-titulo" titulo={servicos.titulo} manuscrito={servicos.manuscrito} />
+
+    <div class="servicos__abas revelar" data-abas>
+      <div class="servicos__lista" role="tablist" aria-label="Serviços" aria-orientation="vertical">
+        {
+          servicos.itens.map((servico, i) => (
+            <button
+              class="servicos__aba"
+              type="button"
+              role="tab"
+              id={`aba-${servico.id}`}
+              aria-controls={`painel-${servico.id}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              tabindex={i === 0 ? 0 : -1}
+            >
+              <span class="servicos__num" aria-hidden="true">{numero(i)}</span>
+              <span class="servicos__nome">{servico.titulo}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="servicos__paineis">
+        {
+          servicos.itens.map((servico) => (
+            <div class="servicos__painel" role="tabpanel" id={`painel-${servico.id}`} aria-labelledby={`aba-${servico.id}`} tabindex="0" data-painel>
+              <div class="servicos__foto">
+                <Picture src={fotos[servico.id]} alt={servico.altFoto} formats={['avif', 'webp']} widths={[480, 800, 1200]} sizes="(max-width: 1099px) 100vw, 46vw" />
+              </div>
+              <h3>{servico.titulo}</h3>
+              <p class="texto">{servico.texto}</p>
+              <ul class="servicos__itens" role="list">
+                {servico.itens.map((item) => (<li>{item}</li>))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="servicos__sanfona revelar">
+      {
+        servicos.itens.map((servico, i) => (
+          <details name="servicos" open={i === 0}>
+            <summary>
+              <span class="servicos__num" aria-hidden="true">{numero(i)}</span>
+              <span>{servico.titulo}</span>
+            </summary>
+            <p class="texto">{servico.texto}</p>
+            <ul class="servicos__itens" role="list">
+              {servico.itens.map((item) => (<li>{item}</li>))}
+            </ul>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  const grupo = document.querySelector<HTMLElement>('[data-abas]');
+  if (grupo) {
+    const abas = Array.from(grupo.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const paineis = Array.from(grupo.querySelectorAll<HTMLElement>('[data-painel]'));
+    const ativar = (indice: number, focar = false) => {
+      abas.forEach((aba, i) => {
+        const ativa = i === indice;
+        aba.setAttribute('aria-selected', String(ativa));
+        aba.tabIndex = ativa ? 0 : -1;
+        paineis[i].hidden = !ativa;
+      });
+      if (focar) abas[indice].focus();
+    };
+    abas.forEach((aba, i) => {
+      aba.addEventListener('click', () => ativar(i));
+      aba.addEventListener('keydown', (evento) => {
+        const total = abas.length;
+        const destinos: Record<string, number> = {
+          ArrowDown: (i + 1) % total,
+          ArrowRight: (i + 1) % total,
+          ArrowUp: (i - 1 + total) % total,
+          ArrowLeft: (i - 1 + total) % total,
+          Home: 0,
+          End: total - 1,
+        };
+        if (evento.key in destinos) {
+          evento.preventDefault();
+          ativar(destinos[evento.key], true);
+        }
+      });
+    });
+    ativar(0);
+  }
+</script>
+
+<style>
+  .servicos__abas {
+    display: grid;
+    grid-template-columns: 5fr 6fr;
+    gap: clamp(40px, 6vw, 72px);
+  }
+
+  .servicos__lista {
+    align-self: start;
+    border-top: 1px solid var(--line);
+  }
+
+  .servicos__aba {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 22px;
+    width: 100%;
+    padding: 22px 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    color: var(--muted);
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .servicos__nome {
+    font-family: var(--font-serif);
+    font-size: clamp(21px, 2vw, 25px);
+    letter-spacing: 0.04em;
+    transition: color 0.3s;
+  }
+
+  .servicos__num {
+    flex: none;
+    width: 26px;
+    font-family: var(--font-serif);
+    font-size: 17px;
+    font-variant-numeric: lining-nums;
+  }
+
+  .servicos__aba:hover .servicos__nome,
+  .servicos__aba[aria-selected='true'] {
+    color: var(--text);
+  }
+
+  .servicos__aba[aria-selected='true'] .servicos__num {
+    color: var(--accent);
+  }
+
+  .servicos__aba[aria-selected='true']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .servicos__foto {
+    aspect-ratio: 16 / 9;
+    margin-bottom: 30px;
+    overflow: hidden;
+  }
+
+  .servicos__foto :global(picture) {
+    height: 100%;
+  }
+
+  .servicos__foto :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(0.7) brightness(0.85);
+  }
+
+  .servicos__painel h3 {
+    margin-bottom: 12px;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 30px;
+    letter-spacing: 0.04em;
+  }
+
+  .servicos__itens {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 24px;
+    margin-top: 22px;
+  }
+
+  .servicos__itens li {
+    position: relative;
+    padding-left: 18px;
+    font-size: 14px;
+  }
+
+  .servicos__itens li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85em;
+    width: 8px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .servicos__sanfona {
+    display: none;
+    border-top: 1px solid var(--line);
+  }
+
+  .servicos__sanfona details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .servicos__sanfona summary {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 18px 0;
+    color: var(--muted);
+    font-family: var(--font-serif);
+    font-size: 20px;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .servicos__sanfona summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .servicos__sanfona summary::after {
+    content: '+';
+    margin-left: auto;
+    color: var(--accent);
+    font-family: var(--font-sans);
+  }
+
+  .servicos__sanfona details[open] summary {
+    color: var(--text);
+  }
+
+  .servicos__sanfona details[open] summary::after {
+    content: '−';
+  }
+
+  .servicos__sanfona details[open] .servicos__num {
+    color: var(--accent);
+  }
+
+  .servicos__sanfona details > :not(summary) {
+    padding-left: 40px;
+  }
+
+  .servicos__sanfona .servicos__itens {
+    grid-template-columns: 1fr;
+    margin: 14px 0 22px;
+  }
+
+  @media (max-width: 899px) {
+    .servicos__abas {
+      display: none;
+    }
+
+    .servicos__sanfona {
+      display: block;
+    }
+  }
+</style>

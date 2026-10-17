@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Base titulo="Página não encontrada | CM Portaria Virtual" descricao="A página que você procurou não existe." semIndice>
+  <section class="erro container">
+    <h1 class="erro__titulo">
+      Página não encontrada
+      <span class="erro__manuscrito manuscrito">vamos te levar de volta</span>
+    </h1>
+    <a class="pill pill--cheia" href={base}>Ir para o início</a>
+  </section>
+</Base>
+
+<style>
+  .erro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    min-height: 100svh;
+    padding-top: var(--header-h);
+    text-align: center;
+  }
+
+  .erro__titulo {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(32px, 6vw, 64px);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .erro__manuscrito {
+    display: block;
+    margin-top: 0.2em;
+    font-size: 0.7em;
+  }
+</style>

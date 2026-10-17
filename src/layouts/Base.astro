@@ -11,10 +11,16 @@ import '../styles/base.css';
 interface Props {
   titulo: string;
   descricao: string;
+  esquemas?: Record<string, unknown>[];
+  semIndice?: boolean;
 }
 
-const { titulo, descricao } = Astro.props;
-const naoIndexar = DEPLOY_TARGET === 'ghpages';
+const { titulo, descricao, esquemas = [], semIndice = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const naoIndexar = semIndice || DEPLOY_TARGET === 'ghpages';
+const canonico = new URL(Astro.url.pathname, Astro.site).href;
+const imagemSocial = new URL(`${base}og-image.jpg`, Astro.site).href;
+const json = (dado: unknown) => JSON.stringify(dado).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -25,10 +31,25 @@ const naoIndexar = DEPLOY_TARGET === 'ghpages';
     <title>{titulo}</title>
     <meta name="description" content={descricao} />
     {naoIndexar && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={canonico} />
     <meta name="theme-color" content="#0b2426" />
+    <link rel="icon" href={`${base}favicon.ico`} sizes="32x32" />
+    <link rel="icon" href={`${base}favicon-32.png`} type="image/png" />
+    <link rel="apple-touch-icon" href={`${base}apple-touch-icon.png`} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="CM Portaria Virtual" />
+    <meta property="og:title" content={titulo} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:url" content={canonico} />
+    <meta property="og:image" content={imagemSocial} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <Font cssVariable="--font-serif" preload={[{ weight: 400 }]} />
     <Font cssVariable="--font-sans" preload={[{ weight: 300 }]} />
     <Font cssVariable="--font-script" />
+    {esquemas.map((esquema) => <script is:inline type="application/ld+json" set:html={json(esquema)} />)}
   </head>
   <body>
     <a class="pular" href="#conteudo">Pular para o conteúdo</a>

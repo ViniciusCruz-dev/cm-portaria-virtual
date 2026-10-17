@@ -1,0 +1,121 @@
+---
+import { cidades, contato, navegacao } from '../content/site';
+import { linkWhatsApp } from '../lib/formulario';
+
+const base = import.meta.env.BASE_URL;
+const ano = new Date().getFullYear();
+---
+
+<footer class="rodape">
+  <div class="container">
+    <p class="rodape__marca" aria-hidden="true">CM Portaria Virtual</p>
+    <div class="rodape__colunas">
+      <nav aria-label="Rodapé">
+        <p class="rotulo">Navegação</p>
+        <ul role="list">
+          {navegacao.celular.map((link) => (<li><a href={`${base}#${link.ancora}`}>{link.rotulo}</a></li>))}
+        </ul>
+      </nav>
+      <div>
+        <p class="rotulo">Moradores</p>
+        <ul role="list">
+          <li><a class="rodape__morador" href={contato.portalMorador} data-evento="clique_area_morador">Área do morador</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="rotulo">Contato</p>
+        <ul role="list">
+          <li><a href={contato.telefone0800Link} data-evento="clique_telefone">{contato.telefone0800}</a></li>
+          <li><a href={linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao)} target="_blank" rel="noopener" data-evento="clique_whatsapp">{contato.whatsapp}</a></li>
+          <li><a href={`mailto:${contato.email}`}>{contato.email}</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="rotulo">Cidades</p>
+        <ul role="list">
+          {cidades.map((cidade) => (<li>{cidade}</li>))}
+        </ul>
+      </div>
+    </div>
+    <div class="rodape__base">
+      <span>© {ano} CM Portaria Virtual</span>
+      <a href={`${base}politica-de-privacidade/`}>Política de privacidade</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    padding: clamp(56px, 8vw, 80px) 0 28px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-deep);
+  }
+
+  .rodape__marca {
+    margin-bottom: clamp(36px, 5vw, 56px);
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(28px, 7.6vw, 104px);
+    line-height: 0.95;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(183, 208, 111, 0.5);
+  }
+
+  .rodape__colunas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+
+  .rodape__colunas .rotulo {
+    margin-bottom: 14px;
+  }
+
+  .rodape__colunas ul {
+    display: grid;
+    gap: 8px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .rodape__colunas a:hover {
+    color: var(--accent);
+  }
+
+  .rodape__morador {
+    color: var(--accent);
+  }
+
+  .rodape__base {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 899px) {
+    .rodape__colunas {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 499px) {
+    .rodape__colunas {
+      grid-template-columns: 1fr;
+    }
+
+    .rodape__base {
+      flex-direction: column;
+    }
+  }
+</style>

@@ -1,0 +1,52 @@
+---
+interface Props {
+  titulo: string;
+  manuscrito: string;
+  id?: string;
+}
+
+const { titulo, manuscrito, id } = Astro.props;
+const linhas = titulo.split('\n');
+---
+
+<h2 class="titulo-secao revelar" id={id}>
+  {linhas.map((linha, i) => (<Fragment>{i > 0 && <br />}{linha}</Fragment>))}
+  <span class="titulo-secao__manuscrito manuscrito">{manuscrito}</span>
+</h2>
+
+<style>
+  .titulo-secao {
+    position: relative;
+    display: inline-block;
+    margin: 0 0 clamp(52px, 6vw, 76px);
+    padding-right: 0.4em;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(30px, 4.2vw, 48px);
+    line-height: 1.05;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .titulo-secao__manuscrito {
+    position: absolute;
+    right: -0.4em;
+    bottom: -0.95em;
+    font-size: 0.82em;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 699px) {
+    .titulo-secao {
+      display: block;
+      padding-right: 0;
+    }
+
+    .titulo-secao__manuscrito {
+      position: static;
+      display: block;
+      margin-top: 0.15em;
+      text-align: right;
+    }
+  }
+</style>

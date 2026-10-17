@@ -1,0 +1,155 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-cm.png';
+import { contato, navegacao } from '../content/site';
+import { linkWhatsApp } from '../lib/formulario';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<dialog class="menu" id="menu-celular" aria-label="Menu" data-menu>
+  <div class="menu__topo container">
+    <Image src={logo} alt="" width={80} height={80} class="menu__logo" />
+    <button class="menu__fechar" type="button" data-fechar-menu>
+      <span class="sr-only">Fechar menu</span>
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <nav class="menu__nav" aria-label="Seções do site">
+    {navegacao.celular.map((link) => <a href={`${base}#${link.ancora}`} data-link-menu>{link.rotulo}</a>)}
+  </nav>
+  <span class="menu__divisor" aria-hidden="true"></span>
+  <p class="menu__contato">
+    <a href={contato.telefone0800Link} data-evento="clique_telefone">{contato.telefone0800}</a>
+    ·
+    <a href={linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao)} target="_blank" rel="noopener" data-evento="clique_whatsapp">{contato.whatsapp}</a>
+  </p>
+  <div class="menu__botoes">
+    <a class="pill pill--cheia" href={`${base}#contato`} data-link-menu>Solicitar orçamento</a>
+    <a class="pill menu__morador" href={contato.portalMorador} data-evento="clique_area_morador">Área do morador</a>
+  </div>
+</dialog>
+
+<script>
+  const menu = document.querySelector<HTMLDialogElement>('[data-menu]');
+  const abrir = document.querySelector<HTMLButtonElement>('[data-abrir-menu]');
+  if (menu && abrir) {
+    const fechar = () => menu.close();
+    abrir.addEventListener('click', () => {
+      menu.showModal();
+      abrir.setAttribute('aria-expanded', 'true');
+    });
+    menu.addEventListener('close', () => {
+      abrir.setAttribute('aria-expanded', 'false');
+      abrir.focus({ preventScroll: true });
+    });
+    menu.querySelector('[data-fechar-menu]')?.addEventListener('click', fechar);
+    menu.querySelectorAll('[data-link-menu]').forEach((link) => link.addEventListener('click', fechar));
+    menu.addEventListener('keydown', (evento) => {
+      if (evento.key !== 'Tab') return;
+      const focaveis = Array.from(menu.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'));
+      const primeiro = focaveis[0];
+      const ultimo = focaveis[focaveis.length - 1];
+      if (evento.shiftKey && document.activeElement === primeiro) {
+        evento.preventDefault();
+        ultimo.focus();
+      } else if (!evento.shiftKey && document.activeElement === ultimo) {
+        evento.preventDefault();
+        primeiro.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0 0 40px;
+    border: 0;
+    background: rgba(11, 36, 38, 0.97);
+    color: var(--text);
+  }
+
+  .menu[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .menu::backdrop {
+    background: rgba(8, 27, 29, 0.6);
+  }
+
+  .menu__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 72px;
+  }
+
+  .menu__topo :global(img) {
+    width: 40px;
+    height: 40px;
+  }
+
+  .menu__fechar {
+    width: 44px;
+    height: 44px;
+    margin-right: -8px;
+    border: 0;
+    background: none;
+    color: var(--text);
+    font-size: 32px;
+    font-weight: 200;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .menu__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: auto;
+  }
+
+  .menu__nav a {
+    font-family: var(--font-serif);
+    font-size: clamp(22px, 7vw, 28px);
+    line-height: 2.05;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .menu__divisor {
+    width: 40px;
+    height: 1px;
+    margin: 20px 0 16px;
+    background: var(--accent);
+  }
+
+  .menu__contato {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+
+  .menu__botoes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 22px;
+    margin-bottom: auto;
+  }
+
+  .menu__morador {
+    color: var(--accent);
+  }
+</style>

@@ -1,6 +1,10 @@
 ---
 import { Font } from 'astro:assets';
 import { DEPLOY_TARGET } from 'astro:env/client';
+import Cabecalho from '../components/Cabecalho.astro';
+import MenuCelular from '../components/MenuCelular.astro';
+import Rodape from '../components/Rodape.astro';
+import WhatsAppFlutuante from '../components/WhatsAppFlutuante.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 
@@ -28,7 +32,11 @@ const naoIndexar = DEPLOY_TARGET === 'ghpages';
   </head>
   <body>
     <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+    <Cabecalho />
+    <MenuCelular />
     <main id="conteudo"><slot /></main>
+    <Rodape />
+    <WhatsAppFlutuante />
     <script>
       const revelaveis = document.querySelectorAll('.revelar');
       const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

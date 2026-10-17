@@ -1,0 +1,42 @@
+---
+import Icone from './Icone.astro';
+import { contato } from '../content/site';
+import { linkWhatsApp } from '../lib/formulario';
+
+const href = linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao);
+---
+
+<a class="whatsapp-flutuante" href={href} target="_blank" rel="noopener" aria-label="Conversar no WhatsApp" data-evento="clique_whatsapp">
+  <Icone nome="whatsapp" tamanho={26} />
+</a>
+
+<style>
+  .whatsapp-flutuante {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transition: transform 0.3s var(--ease);
+  }
+
+  .whatsapp-flutuante:hover {
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 699px) {
+    .whatsapp-flutuante {
+      right: 16px;
+      bottom: 16px;
+      width: 52px;
+      height: 52px;
+    }
+  }
+</style>

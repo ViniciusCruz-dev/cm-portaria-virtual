@@ -1,0 +1,192 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-cm.png';
+import Icone from './Icone.astro';
+import { contato, navegacao } from '../content/site';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<header class="cabecalho" data-cabecalho>
+  <div class="cabecalho__barra container">
+    <a class="cabecalho__marca" href={base}>
+      <Image src={logo} alt="" width={96} height={96} class="cabecalho__logo" loading="eager" />
+      <span class="cabecalho__nome">CM<br />Portaria Virtual</span>
+    </a>
+    <nav class="cabecalho__nav" aria-label="Seções do site">
+      {navegacao.computador.map((link) => <a href={`${base}#${link.ancora}`}>{link.rotulo}</a>)}
+    </nav>
+    <a class="cabecalho__morador" href={contato.portalMorador} data-evento="clique_area_morador">
+      <Icone nome="pessoa" tamanho={15} />
+      <span>Área do morador</span>
+    </a>
+    <a class="pill pill--cheia cabecalho__orcamento" href={`${base}#contato`}>Orçamento</a>
+    <a class="cabecalho__morador-curto" href={contato.portalMorador} data-evento="clique_area_morador">
+      <Icone nome="pessoa" tamanho={13} />
+      <span>Morador</span>
+    </a>
+    <button class="cabecalho__abrir" type="button" aria-haspopup="dialog" aria-controls="menu-celular" aria-expanded="false" data-abrir-menu>
+      <span class="sr-only">Abrir menu</span>
+      <i aria-hidden="true"></i>
+      <i aria-hidden="true"></i>
+    </button>
+  </div>
+</header>
+
+<script>
+  const cabecalho = document.querySelector<HTMLElement>('[data-cabecalho]');
+  if (cabecalho) {
+    const atualizar = () => cabecalho.classList.toggle('is-solido', window.scrollY > 80);
+    atualizar();
+    window.addEventListener('scroll', atualizar, { passive: true });
+  }
+</script>
+
+<style>
+  .cabecalho {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    border-bottom: 1px solid transparent;
+    transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease);
+  }
+
+  .cabecalho.is-solido {
+    background: rgba(11, 36, 38, 0.96);
+    border-bottom-color: var(--line);
+    backdrop-filter: blur(10px);
+  }
+
+  .cabecalho__barra {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: var(--header-h);
+  }
+
+  .cabecalho__marca {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .cabecalho__marca :global(img) {
+    width: 48px;
+    height: 48px;
+  }
+
+  .cabecalho__nome {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 17px;
+    line-height: 1.15;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .cabecalho__nav {
+    display: flex;
+    gap: 28px;
+    margin-left: auto;
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .cabecalho__nav a {
+    padding-block: 12px;
+    opacity: 0.85;
+    transition: opacity 0.3s, color 0.3s;
+  }
+
+  .cabecalho__nav a:hover {
+    color: var(--accent);
+    opacity: 1;
+  }
+
+  .cabecalho__morador {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 22px;
+    padding: 12px 0 12px 22px;
+    border-left: 1px solid var(--line);
+    color: var(--accent);
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .cabecalho__orcamento {
+    min-height: 44px;
+    margin-left: 16px;
+    padding: 0 22px;
+    font-size: 11px;
+  }
+
+  .cabecalho__morador-curto,
+  .cabecalho__abrir {
+    display: none;
+  }
+
+  @media (max-width: 1099px) {
+    .cabecalho__marca :global(img) {
+      width: 40px;
+      height: 40px;
+    }
+
+    .cabecalho__nome {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .cabecalho__nav,
+    .cabecalho__morador,
+    .cabecalho__orcamento {
+      display: none;
+    }
+
+    .cabecalho__morador-curto {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+      margin-left: auto;
+      padding: 0 14px 0 12px;
+      border: 1px solid rgba(183, 208, 111, 0.6);
+      border-radius: var(--radius-pill);
+      color: var(--accent);
+      font-size: 10.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .cabecalho__abrir {
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 7px;
+      width: 44px;
+      height: 44px;
+      margin-right: -8px;
+      padding: 0 8px;
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+
+    .cabecalho__abrir i {
+      display: block;
+      height: 1.5px;
+      background: var(--text);
+    }
+  }
+</style>

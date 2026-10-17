@@ -1,0 +1,24 @@
+:root {
+  --bg: #0b2426;
+  --bg-2: #0d2a2c;
+  --bg-deep: #081b1d;
+  --line: rgba(236, 232, 221, 0.13);
+  --line-strong: rgba(236, 232, 221, 0.28);
+  --text: #ece8dd;
+  --muted: rgba(236, 232, 221, 0.68);
+  --accent: #b7d06f;
+  --accent-logo: #90ba42;
+  --on-accent: #0b2426;
+  --gutter: clamp(20px, 5vw, 64px);
+  --max: 1240px;
+  --section-y: clamp(80px, 11vw, 136px);
+  --radius-pill: 999px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --header-h: 88px;
+}
+
+@media (max-width: 1099px) {
+  :root {
+    --header-h: 72px;
+  }
+}

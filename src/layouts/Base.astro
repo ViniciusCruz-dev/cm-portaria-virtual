@@ -1,0 +1,52 @@
+---
+import { Font } from 'astro:assets';
+import { DEPLOY_TARGET } from 'astro:env/client';
+import '../styles/tokens.css';
+import '../styles/base.css';
+
+interface Props {
+  titulo: string;
+  descricao: string;
+}
+
+const { titulo, descricao } = Astro.props;
+const naoIndexar = DEPLOY_TARGET === 'ghpages';
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titulo}</title>
+    <meta name="description" content={descricao} />
+    {naoIndexar && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#0b2426" />
+    <Font cssVariable="--font-serif" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-sans" preload={[{ weight: 300 }]} />
+    <Font cssVariable="--font-script" />
+  </head>
+  <body>
+    <a class="pular" href="#conteudo">Pular para o conteúdo</a>
+    <main id="conteudo"><slot /></main>
+    <script>
+      const revelaveis = document.querySelectorAll('.revelar');
+      const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (revelaveis.length > 0 && !reduzir && 'IntersectionObserver' in window) {
+        document.documentElement.classList.add('js-revelar');
+        const observador = new IntersectionObserver(
+          (entradas) => {
+            for (const entrada of entradas) {
+              if (entrada.isIntersecting) {
+                entrada.target.classList.add('is-visivel');
+                observador.unobserve(entrada.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.1 },
+        );
+        revelaveis.forEach((elemento) => observador.observe(elemento));
+      }
+    </script>
+  </body>
+</html>

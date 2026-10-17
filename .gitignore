@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.astro/
+analise/
+logos/
+.superpowers/
+.env
+.env.*
+test-results/
+playwright-report/
+lighthouse*.json
+*.log

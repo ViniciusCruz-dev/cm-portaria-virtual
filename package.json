@@ -1,0 +1,27 @@
+{
+  "name": "cm-portaria-virtual",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:producao": "cross-env DEPLOY_TARGET=hostgator astro build && node scripts/pos-build.mjs",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "verificar:php": "node scripts/verificar-php.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.0",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "cross-env": "^10.1.0",
+    "php-parser": "^3.7.0",
+    "vitest": "^5.0.5"
+  }
+}

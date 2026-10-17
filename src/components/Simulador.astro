@@ -1,0 +1,403 @@
+---
+import TituloSecao from './TituloSecao.astro';
+import { simulador } from '../content/site';
+import { custoMensal, formatarReais, PREMISSAS_PADRAO, resultado, ROTULO_TIPO, type TipoPortaria } from '../lib/simulador';
+
+const tipos: TipoPortaria[] = ['24h', '12h-diurna', '12h-noturna'];
+const UNIDADES_PADRAO = 80;
+const inicial = resultado(custoMensal('24h'), UNIDADES_PADRAO);
+---
+
+<section class="secao simulador" id="simulador" aria-labelledby="simulador-titulo">
+  <div class="container">
+    <TituloSecao id="simulador-titulo" titulo={simulador.titulo} manuscrito={simulador.manuscrito} />
+
+    <div class="simulador__grade revelar" data-simulador>
+      <div class="simulador__controles">
+        <fieldset class="simulador__campo" data-campo-estimativa>
+          <legend class="rotulo">Portaria atual</legend>
+          <div class="simulador__tipos">
+            {
+              tipos.map((tipo, i) => (
+                <label class="simulador__tipo">
+                  <input type="radio" name="tipo" value={tipo} checked={i === 0} />
+                  <span>{ROTULO_TIPO[tipo]}</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <div class="simulador__campo">
+          <label class="rotulo simulador__rotulo" for="sim-unidades">
+            Número de unidades <output for="sim-unidades" data-saida="unidades">{UNIDADES_PADRAO}</output>
+          </label>
+          <input id="sim-unidades" type="range" min="10" max="400" step="5" value={UNIDADES_PADRAO} />
+        </div>
+
+        <details class="simulador__ajustes" data-campo-estimativa>
+          <summary>Ajustar valores</summary>
+          <div class="simulador__campo">
+            <label class="rotulo simulador__rotulo" for="sim-diurno">
+              Custo do porteiro diurno <output for="sim-diurno" data-saida="diurno">{formatarReais(PREMISSAS_PADRAO.custoDiurno)}</output>
+            </label>
+            <input id="sim-diurno" type="range" min="1500" max="6000" step="50" value={PREMISSAS_PADRAO.custoDiurno} />
+          </div>
+          <div class="simulador__campo">
+            <label class="rotulo simulador__rotulo" for="sim-noturno">
+              Custo do porteiro noturno <output for="sim-noturno" data-saida="noturno">{formatarReais(PREMISSAS_PADRAO.custoNoturno)}</output>
+            </label>
+            <input id="sim-noturno" type="range" min="1500" max="7000" step="50" value={PREMISSAS_PADRAO.custoNoturno} />
+          </div>
+          <p class="simulador__nota">Encargos de 80% (FGTS, INSS, férias e 13º) já entram na conta.</p>
+        </details>
+
+        <div class="simulador__informado">
+          <label class="simulador__alternar">
+            <input type="checkbox" data-alternar-informado />
+            <span>Já sei quanto pago</span>
+          </label>
+          <div class="simulador__campo" hidden data-campo-informado>
+            <label class="rotulo" for="sim-valor">Valor mensal atual (R$)</label>
+            <input id="sim-valor" class="simulador__valor" type="number" inputmode="numeric" min="0" step="100" placeholder="Ex.: 20000" />
+          </div>
+        </div>
+      </div>
+
+      <div class="simulador__resultado">
+        <p class="simulador__mensal">
+          <span data-saida="mensal">{formatarReais(inicial.mensal)}</span>
+          <small data-saida="legenda">por mês com a portaria atual</small>
+        </p>
+        <div class="simulador__mini">
+          <p><b data-saida="unidade">{formatarReais(inicial.porUnidade)}</b><span>por unidade / mês</span></p>
+          <p><b data-saida="anual">{formatarReais(inicial.anual)}</b><span>por ano</span></p>
+        </div>
+        <p class="sr-only" aria-live="polite" data-anuncio></p>
+        <p class="simulador__aviso">{simulador.aviso}</p>
+        <button class="pill pill--cheia simulador__botao" type="button" data-cta-simulador>{simulador.botao}</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { custoMensal, formatarReais, PREMISSAS_PADRAO, resultado, resumoSimulacao, type TipoPortaria } from '../lib/simulador';
+
+  const raiz = document.querySelector<HTMLElement>('[data-simulador]');
+  if (raiz) {
+    const unidades = raiz.querySelector<HTMLInputElement>('#sim-unidades')!;
+    const diurno = raiz.querySelector<HTMLInputElement>('#sim-diurno')!;
+    const noturno = raiz.querySelector<HTMLInputElement>('#sim-noturno')!;
+    const valor = raiz.querySelector<HTMLInputElement>('#sim-valor')!;
+    const alternar = raiz.querySelector<HTMLInputElement>('[data-alternar-informado]')!;
+    const campoInformado = raiz.querySelector<HTMLElement>('[data-campo-informado]')!;
+    const camposEstimativa = raiz.querySelectorAll<HTMLElement>('[data-campo-estimativa]');
+    const anuncio = raiz.querySelector<HTMLElement>('[data-anuncio]')!;
+    const saida = (nome: string) => raiz.querySelector<HTMLElement>(`[data-saida="${nome}"]`)!;
+    let timerAnuncio: number | undefined;
+    let usou = false;
+
+    const tipoAtual = () => (raiz.querySelector<HTMLInputElement>('input[name="tipo"]:checked')?.value ?? '24h') as TipoPortaria;
+
+    const estado = () => {
+      const informado = alternar.checked;
+      const totalUnidades = Number(unidades.value);
+      const mensal = informado
+        ? Math.max(0, Number(valor.value) || 0)
+        : custoMensal(tipoAtual(), { ...PREMISSAS_PADRAO, custoDiurno: Number(diurno.value), custoNoturno: Number(noturno.value) });
+      return { informado, tipo: tipoAtual(), unidades: totalUnidades, ...resultado(mensal, totalUnidades) };
+    };
+
+    const atualizar = () => {
+      const e = estado();
+      saida('unidades').textContent = String(e.unidades);
+      saida('diurno').textContent = formatarReais(Number(diurno.value));
+      saida('noturno').textContent = formatarReais(Number(noturno.value));
+      diurno.setAttribute('aria-valuetext', formatarReais(Number(diurno.value)));
+      noturno.setAttribute('aria-valuetext', formatarReais(Number(noturno.value)));
+      saida('mensal').textContent = formatarReais(e.mensal);
+      saida('legenda').textContent = e.informado ? 'por mês, valor informado' : 'por mês com a portaria atual';
+      saida('unidade').textContent = formatarReais(e.porUnidade);
+      saida('anual').textContent = formatarReais(e.anual);
+      window.clearTimeout(timerAnuncio);
+      timerAnuncio = window.setTimeout(() => {
+        anuncio.textContent = `${formatarReais(e.mensal)} por mês, ${formatarReais(e.porUnidade)} por unidade.`;
+      }, 700);
+    };
+
+    const aoInteragir = () => {
+      if (!usou) {
+        usou = true;
+        window.dispatchEvent(new CustomEvent('cm:evento', { detail: { nome: 'uso_simulador' } }));
+      }
+      atualizar();
+    };
+
+    alternar.addEventListener('change', () => {
+      campoInformado.hidden = !alternar.checked;
+      camposEstimativa.forEach((campo) => {
+        campo.hidden = alternar.checked;
+      });
+      if (alternar.checked) valor.focus();
+    });
+    raiz.addEventListener('input', aoInteragir);
+    raiz.addEventListener('change', aoInteragir);
+
+    raiz.querySelector<HTMLButtonElement>('[data-cta-simulador]')!.addEventListener('click', () => {
+      const e = estado();
+      const resumo = resumoSimulacao({ tipo: e.tipo, unidades: e.unidades, mensal: e.mensal, informado: e.informado });
+      window.dispatchEvent(new CustomEvent('cm:simulacao', { detail: { resumo } }));
+      const reduzir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById('contato')?.scrollIntoView({ behavior: reduzir ? 'auto' : 'smooth' });
+      window.setTimeout(() => document.getElementById('campo-nome')?.focus({ preventScroll: true }), 600);
+    });
+
+    atualizar();
+    raiz.dataset.pronto = 'true';
+  }
+</script>
+
+<style>
+  .simulador__grade {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--line);
+  }
+
+  .simulador__controles {
+    padding: clamp(24px, 3.4vw, 40px);
+    border-right: 1px solid var(--line);
+  }
+
+  .simulador__campo {
+    min-width: 0;
+    margin: 0 0 30px;
+    padding: 0;
+    border: 0;
+  }
+
+  .simulador__campo legend {
+    margin-bottom: 14px;
+  }
+
+  .simulador__rotulo {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .simulador__rotulo output {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+  }
+
+  .simulador__tipos {
+    display: flex;
+    padding: 4px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+  }
+
+  .simulador__tipo {
+    position: relative;
+    flex: 1;
+  }
+
+  .simulador__tipo input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .simulador__tipo span {
+    display: block;
+    padding: 11px 6px;
+    border-radius: var(--radius-pill);
+    color: var(--muted);
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    text-align: center;
+    text-transform: uppercase;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  .simulador__tipo input:checked + span {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 500;
+  }
+
+  .simulador__tipo input:focus-visible + span {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .simulador input[type='range'] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+
+  .simulador__ajustes {
+    margin: -6px 0 26px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .simulador__ajustes summary {
+    padding: 14px 0;
+    color: var(--accent);
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .simulador__ajustes summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .simulador__ajustes summary::after {
+    content: ' +';
+  }
+
+  .simulador__ajustes[open] summary::after {
+    content: ' −';
+  }
+
+  .simulador__ajustes .simulador__campo {
+    margin-bottom: 20px;
+  }
+
+  .simulador__nota {
+    margin-bottom: 16px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .simulador__alternar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .simulador__alternar input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+  }
+
+  .simulador__informado .simulador__campo {
+    margin-top: 18px;
+  }
+
+  .simulador__valor {
+    width: 100%;
+    padding: 10px 0 12px;
+    border: 0;
+    border-bottom: 1px solid var(--line-strong);
+    background: transparent;
+    font-family: var(--font-serif);
+    font-size: 22px;
+  }
+
+  .simulador__resultado {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(24px, 3.4vw, 40px);
+    background: linear-gradient(160deg, rgba(183, 208, 111, 0.07), transparent 60%);
+  }
+
+  .simulador__mensal span {
+    display: block;
+    font-family: var(--font-serif);
+    font-weight: 300;
+    font-size: clamp(48px, 6vw, 76px);
+    line-height: 1;
+    font-variant-numeric: lining-nums;
+  }
+
+  .simulador__mensal small {
+    display: block;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .simulador__mini {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 28px 0;
+    border-block: 1px solid var(--line);
+  }
+
+  .simulador__mini p {
+    padding: 16px 0;
+  }
+
+  .simulador__mini p + p {
+    padding-left: 22px;
+    border-left: 1px solid var(--line);
+  }
+
+  .simulador__mini b {
+    display: block;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(24px, 2.6vw, 32px);
+    font-variant-numeric: lining-nums;
+  }
+
+  .simulador__mini span {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .simulador__aviso {
+    margin-bottom: 24px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.65;
+  }
+
+  .simulador__botao {
+    align-self: flex-start;
+    margin-top: auto;
+  }
+
+  @media (max-width: 899px) {
+    .simulador__grade {
+      grid-template-columns: 1fr;
+    }
+
+    .simulador__controles {
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .simulador__botao {
+      align-self: stretch;
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 499px) {
+    .simulador__tipo span {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+    }
+  }
+</style>

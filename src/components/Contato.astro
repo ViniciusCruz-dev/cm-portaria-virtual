@@ -1,0 +1,424 @@
+---
+import { DEPLOY_TARGET } from 'astro:env/client';
+import TituloSecao from './TituloSecao.astro';
+import { contato, contatoSecao } from '../content/site';
+import { CIDADES_FORM, linkWhatsApp } from '../lib/formulario';
+
+const base = import.meta.env.BASE_URL;
+const modo = DEPLOY_TARGET === 'hostgator' ? 'php' : 'demo';
+const endpoint = `${base}api/orcamento.php`;
+---
+
+<section class="secao secao--alt contato" id="contato" aria-labelledby="contato-titulo">
+  <div class="container contato__grade">
+    <div>
+      <TituloSecao id="contato-titulo" titulo={contatoSecao.titulo} manuscrito={contatoSecao.manuscrito} />
+      <dl class="contato__lista revelar">
+        <div><dt class="rotulo">Central 24h · ligação gratuita</dt><dd><a href={contato.telefone0800Link} data-evento="clique_telefone">{contato.telefone0800}</a></dd></div>
+        <div><dt class="rotulo">WhatsApp</dt><dd><a href={linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao)} target="_blank" rel="noopener" data-evento="clique_whatsapp">{contato.whatsapp}</a></dd></div>
+        <div><dt class="rotulo">E-mail</dt><dd><a href={`mailto:${contato.email}`}>{contato.email}</a></dd></div>
+        <div><dt class="rotulo">Comercial</dt><dd>{contato.horarioComercial}</dd></div>
+        <div><dt class="rotulo">Monitoramento e suporte</dt><dd>{contato.horarioSuporte}</dd></div>
+      </dl>
+    </div>
+
+    <div class="contato__formulario revelar">
+      <form
+        class="form"
+        method="post"
+        action={modo === 'php' ? endpoint : undefined}
+        novalidate
+        data-form-orcamento
+        data-modo={modo}
+        data-endpoint={endpoint}
+        data-whatsapp={contato.whatsappNumero}
+      >
+        <div class="form__campo">
+          <label for="campo-nome">Nome</label>
+          <input id="campo-nome" name="nome" type="text" autocomplete="name" required maxlength="80" aria-describedby="erro-nome" />
+          <p class="form__erro" id="erro-nome" data-erro="nome"></p>
+        </div>
+        <div class="form__campo">
+          <label for="campo-telefone">Telefone / WhatsApp</label>
+          <input id="campo-telefone" name="telefone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="16" aria-describedby="erro-telefone" />
+          <p class="form__erro" id="erro-telefone" data-erro="telefone"></p>
+        </div>
+        <div class="form__campo">
+          <label for="campo-email">E-mail</label>
+          <input id="campo-email" name="email" type="email" autocomplete="email" maxlength="120" aria-describedby="erro-email" />
+          <p class="form__erro" id="erro-email" data-erro="email"></p>
+        </div>
+        <div class="form__campo">
+          <label for="campo-condominio">Condomínio</label>
+          <input id="campo-condominio" name="condominio" type="text" required maxlength="100" aria-describedby="erro-condominio" />
+          <p class="form__erro" id="erro-condominio" data-erro="condominio"></p>
+        </div>
+        <div class="form__campo">
+          <label for="campo-cidade">Cidade</label>
+          <select id="campo-cidade" name="cidade" required aria-describedby="erro-cidade">
+            <option value="">Selecione</option>
+            {CIDADES_FORM.map((cidade) => (<option value={cidade}>{cidade}</option>))}
+          </select>
+          <p class="form__erro" id="erro-cidade" data-erro="cidade"></p>
+        </div>
+        <div class="form__campo">
+          <label for="campo-unidades">Unidades</label>
+          <input id="campo-unidades" name="unidades" type="text" inputmode="numeric" maxlength="4" aria-describedby="erro-unidades" />
+          <p class="form__erro" id="erro-unidades" data-erro="unidades"></p>
+        </div>
+        <div class="form__campo form__campo--inteiro">
+          <label for="campo-mensagem">Mensagem (opcional)</label>
+          <textarea id="campo-mensagem" name="mensagem" rows="3" maxlength="1000" aria-describedby="erro-mensagem"></textarea>
+          <p class="form__erro" id="erro-mensagem" data-erro="mensagem"></p>
+        </div>
+        <input type="hidden" name="simulacao" value="" />
+        <input type="hidden" name="t" value="" />
+        <div class="form__isca" aria-hidden="true">
+          <label for="campo-website">Não preencha este campo</label>
+          <input id="campo-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <div class="form__envio">
+          <p class="form__consentimento">
+            Ao enviar, você concorda com a nossa <a href={`${base}politica-de-privacidade/`}>Política de Privacidade</a>. Respondemos por e-mail ou WhatsApp.
+          </p>
+          <button class="pill pill--cheia" type="submit" data-enviar>{contatoSecao.botao}</button>
+        </div>
+      </form>
+
+      <div class="form__painel" tabindex="-1" hidden data-painel-sucesso>
+        <p class="form__painel-titulo">Pedido recebido.</p>
+        <p class="texto" data-texto-sucesso>Obrigado! Nossa equipe vai entrar em contato em breve.</p>
+        <p class="form__demo" hidden data-aviso-demo>Versão de demonstração: nenhum dado foi enviado. No site oficial, este pedido chega por e-mail.</p>
+        <a class="pill pill--cheia" href={linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao)} target="_blank" rel="noopener" data-evento="clique_whatsapp" data-whatsapp-sucesso>Continuar no WhatsApp</a>
+      </div>
+
+      <div class="form__painel" tabindex="-1" hidden data-painel-falha>
+        <p class="form__painel-titulo">Não conseguimos enviar agora.</p>
+        <p class="texto">Você pode mandar o mesmo pedido pelo WhatsApp ou tentar de novo em instantes.</p>
+        <div class="form__painel-botoes">
+          <a class="pill pill--cheia" href={linkWhatsApp(contato.whatsappNumero, contato.mensagemWhatsAppPadrao)} target="_blank" rel="noopener" data-evento="clique_whatsapp" data-whatsapp-falha>Enviar pelo WhatsApp</a>
+          <button class="pill" type="button" data-tentar-novamente>Tentar de novo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import {
+    CAMPOS_PEDIDO,
+    linkWhatsApp,
+    mascararTelefone,
+    mensagemWhatsAppCompleta,
+    mensagemWhatsAppSucesso,
+    validarCampo,
+    validarPedido,
+    type CampoPedido,
+    type DadosPedido,
+  } from '../lib/formulario';
+
+  const form = document.querySelector<HTMLFormElement>('[data-form-orcamento]');
+  const painelSucesso = document.querySelector<HTMLElement>('[data-painel-sucesso]');
+  const painelFalha = document.querySelector<HTMLElement>('[data-painel-falha]');
+
+  if (form && painelSucesso && painelFalha) {
+    const numero = form.dataset.whatsapp ?? '';
+    const abertoEm = Date.now();
+    const botaoEnviar = form.querySelector<HTMLButtonElement>('[data-enviar]')!;
+    const textoBotao = botaoEnviar.textContent ?? 'Enviar pedido';
+    const campo = (nome: string) => form.elements.namedItem(nome) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null;
+
+    const ler = (): DadosPedido => {
+      const valor = (nome: string) => (campo(nome)?.value ?? '').trim();
+      return {
+        nome: valor('nome'),
+        telefone: valor('telefone'),
+        email: valor('email'),
+        condominio: valor('condominio'),
+        cidade: valor('cidade'),
+        unidades: valor('unidades'),
+        mensagem: valor('mensagem'),
+        simulacao: valor('simulacao'),
+      };
+    };
+
+    const marcarErro = (nome: CampoPedido, mensagem?: string) => {
+      const entrada = campo(nome);
+      const erro = form.querySelector<HTMLElement>(`[data-erro="${nome}"]`);
+      if (!entrada || !erro) return;
+      erro.textContent = mensagem ?? '';
+      if (mensagem) entrada.setAttribute('aria-invalid', 'true');
+      else entrada.removeAttribute('aria-invalid');
+    };
+
+    const telefone = campo('telefone') as HTMLInputElement;
+    telefone.addEventListener('input', () => {
+      telefone.value = mascararTelefone(telefone.value);
+    });
+
+    CAMPOS_PEDIDO.forEach((nome) => {
+      const entrada = campo(nome);
+      entrada?.addEventListener('blur', () => {
+        if (entrada.value.trim() !== '' || entrada.hasAttribute('aria-invalid')) marcarErro(nome, validarCampo(nome, entrada.value));
+      });
+    });
+
+    const mostrar = (painel: HTMLElement) => {
+      form.hidden = true;
+      painelSucesso.hidden = painel !== painelSucesso;
+      painelFalha.hidden = painel !== painelFalha;
+      painel.focus();
+    };
+
+    const voltar = () => {
+      form.hidden = false;
+      painelSucesso.hidden = true;
+      painelFalha.hidden = true;
+      botaoEnviar.disabled = false;
+      botaoEnviar.textContent = textoBotao;
+      campo('nome')?.focus();
+    };
+
+    form.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      const dados = ler();
+      const erros = validarPedido(dados);
+      CAMPOS_PEDIDO.forEach((nome) => marcarErro(nome, erros[nome]));
+      const primeiroErro = CAMPOS_PEDIDO.find((nome) => erros[nome]);
+      if (primeiroErro) {
+        campo(primeiroErro)?.focus();
+        return;
+      }
+
+      botaoEnviar.disabled = true;
+      botaoEnviar.textContent = 'Enviando…';
+      const primeiroNome = dados.nome.split(' ')[0];
+      painelSucesso.querySelector<HTMLElement>('[data-texto-sucesso]')!.textContent = `Obrigado, ${primeiroNome}. Nossa equipe vai entrar em contato em breve.`;
+      painelSucesso.querySelector<HTMLAnchorElement>('[data-whatsapp-sucesso]')!.href = linkWhatsApp(numero, mensagemWhatsAppSucesso(dados));
+      painelFalha.querySelector<HTMLAnchorElement>('[data-whatsapp-falha]')!.href = linkWhatsApp(numero, mensagemWhatsAppCompleta(dados));
+
+      if (form.dataset.modo !== 'php') {
+        await new Promise((resolver) => window.setTimeout(resolver, 500));
+        painelSucesso.querySelector<HTMLElement>('[data-aviso-demo]')!.hidden = false;
+        mostrar(painelSucesso);
+        return;
+      }
+
+      try {
+        const controle = new AbortController();
+        const limite = window.setTimeout(() => controle.abort(), 15000);
+        const isca = (campo('website')?.value ?? '').trim();
+        const resposta = await fetch(form.dataset.endpoint ?? '', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ ...dados, website: isca, t: Date.now() - abertoEm }),
+          signal: controle.signal,
+        });
+        window.clearTimeout(limite);
+        const corpo = (await resposta.json().catch(() => ({ ok: false }))) as { ok?: boolean };
+        if (resposta.ok && corpo.ok) {
+          painelSucesso.querySelector<HTMLElement>('[data-aviso-demo]')!.hidden = true;
+          window.dispatchEvent(new CustomEvent('cm:evento', { detail: { nome: 'gerar_lead' } }));
+          mostrar(painelSucesso);
+        } else {
+          mostrar(painelFalha);
+        }
+      } catch {
+        mostrar(painelFalha);
+      }
+    });
+
+    painelFalha.querySelector('[data-tentar-novamente]')?.addEventListener('click', voltar);
+
+    window.addEventListener('cm:simulacao', (evento) => {
+      const { resumo } = (evento as CustomEvent<{ resumo: string }>).detail;
+      const simulacao = campo('simulacao') as HTMLInputElement;
+      const mensagem = campo('mensagem') as HTMLTextAreaElement;
+      simulacao.value = resumo;
+      const restante = mensagem.value.replace(/^Simulação:.*(\n|$)/, '').trimStart();
+      mensagem.value = restante ? `${resumo}\n${restante}` : resumo;
+    });
+  }
+</script>
+
+<style>
+  .contato__grade {
+    display: grid;
+    grid-template-columns: 5fr 6fr;
+    gap: clamp(40px, 6vw, 80px);
+  }
+
+  .contato__lista {
+    border-top: 1px solid var(--line);
+  }
+
+  .contato__lista div {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .contato__lista dt {
+    margin-bottom: 6px;
+  }
+
+  .contato__lista dd {
+    font-size: 17px;
+    overflow-wrap: anywhere;
+  }
+
+  .contato__lista a:hover {
+    color: var(--accent);
+  }
+
+  .contato__formulario {
+    align-self: end;
+  }
+
+  .form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 30px;
+  }
+
+  .form__campo--inteiro,
+  .form__envio {
+    grid-column: 1 / -1;
+  }
+
+  .form label {
+    display: block;
+    padding-top: 14px;
+    color: var(--muted);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .form input,
+  .form select,
+  .form textarea {
+    width: 100%;
+    padding: 10px 0 12px;
+    border: 0;
+    border-bottom: 1px solid var(--line-strong);
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 16px;
+  }
+
+  .form textarea {
+    min-height: 96px;
+    resize: vertical;
+  }
+
+  .form select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+    background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  .form select option {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .form input:focus,
+  .form select:focus,
+  .form textarea:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+    box-shadow: 0 1px 0 0 var(--accent);
+  }
+
+  .form [aria-invalid='true'] {
+    border-bottom-color: #ff8a80;
+  }
+
+  .form__erro {
+    min-height: 1.3em;
+    margin-top: 6px;
+    color: #ffb4a9;
+    font-size: 12px;
+  }
+
+  .form__isca {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form__envio {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 22px;
+  }
+
+  .form__consentimento {
+    max-width: 320px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .form__consentimento a {
+    text-decoration: underline;
+  }
+
+  .form__painel {
+    padding: clamp(24px, 4vw, 36px);
+    border: 1px solid var(--line);
+  }
+
+  .form__painel:focus {
+    outline: none;
+  }
+
+  .form__painel-titulo {
+    margin-bottom: 12px;
+    font-family: var(--font-serif);
+    font-size: 34px;
+  }
+
+  .form__demo {
+    margin-top: 18px;
+    padding: 12px 16px;
+    border-left: 2px solid var(--accent);
+    background: rgba(183, 208, 111, 0.08);
+    font-size: 13px;
+  }
+
+  .form__painel > .pill,
+  .form__painel-botoes {
+    margin-top: 24px;
+  }
+
+  .form__painel-botoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 899px) {
+    .contato__grade {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .form {
+      grid-template-columns: 1fr;
+    }
+
+    .form__envio {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
